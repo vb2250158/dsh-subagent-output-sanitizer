@@ -1,0 +1,3 @@
+- insert:
+    - id: subagent-output-sanitizer
+      name: dsh-subagent-output-sanitizer
