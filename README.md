@@ -1,5 +1,7 @@
 # dsh-subagent-output-sanitizer
 
+This release requires DSH 0.2.1-alpha.1 or a compatible 0.2 release. See [compatibility details](docs/dsh-0.2-compatibility.md).
+
 清理子代理消息中的孤立工具块。
 
 ## 安装
