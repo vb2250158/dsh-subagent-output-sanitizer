@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Subagent output cleanup",
+    "description": "Remove orphaned tool blocks from subagent messages."
+  }
+}
