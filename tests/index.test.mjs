@@ -47,18 +47,22 @@ test('sanitizes only subagent delivery messages with non-text content', () => {
   assert.equal(sanitizeSubagentMessage(ordinaryMessage), ordinaryMessage)
 })
 
-test('repairs an unsafe delivery already visible in a session', () => {
+test('repairs an unsafe delivery already visible in a session', async () => {
   const appended = []
   const session = {
     surface: { nodes: [4] },
-    events: [undefined, undefined, undefined, undefined, { type: 'user/message', data: unsafeMessage }],
+    id: 'fixture-session',
     append(type, data, options) { appended.push({ type, data, options }) },
   }
-  assert.equal(repairSubagentSurface(session), 1)
+  const query = { readSurface: async id => {
+    assert.equal(id, session.id)
+    return { events: [{ seq: 4, type: 'user/message', data: unsafeMessage }] }
+  } }
+  assert.equal(await repairSubagentSurface(session, query), 1)
   assert.equal(appended.length, 1)
   assert.equal(appended[0].type, 'user/message')
   assert.deepEqual(appended[0].options, {
-    surfaceOp: { op: 'replace', start: 4, end: 4 },
+    surfaceOp: { op: 'replace', startSeq: 4, endSeq: 4 },
     sourceEventSeqs: [4],
   })
   assert.ok(appended[0].data.content.every(block => block.type === 'text'))
@@ -68,8 +72,18 @@ test('registers public lifecycle and pre-step extensions', async () => {
   const listeners = []
   const ctx = { on(name, listener) { listeners.push({ name, listener }); return () => {} } }
   apply(ctx)
-  assert.deepEqual(listeners.map(listener => listener.name), ['agent/session-start', 'agent/pre-step'])
+  assert.deepEqual(listeners.map(listener => listener.name), ['agent/created', 'agent/pre-step'])
   const preStep = listeners.find(listener => listener.name === 'agent/pre-step').listener
   const decision = await preStep({}, async () => ({ kind: 'enter', messages: [unsafeMessage] }))
   assert.ok(decision.messages[0].content.every(block => block.type === 'text'))
+})
+
+test('does not restore nodes replaced during a pending surface read or write after a failed read', async () => {
+  const session = { id: 'fixture', surface: { nodes: [4] }, append() { assert.fail('must not append') } }
+  let release
+  const pending = repairSubagentSurface(session, { readSurface: () => new Promise(resolve => { release = resolve }) })
+  session.surface.nodes = [5]
+  release({ events: [{ seq: 4, type: 'user/message', data: unsafeMessage }] })
+  assert.equal(await pending, 0)
+  await assert.rejects(repairSubagentSurface(session, { readSurface: async () => { throw new Error('read failed') } }), /read failed/)
 })

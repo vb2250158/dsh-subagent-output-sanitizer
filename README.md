@@ -1,8 +1,10 @@
 # dsh-subagent-output-sanitizer
 
-This release requires DSH 0.2.1-alpha.1 or a compatible 0.2 release. See [compatibility details](docs/dsh-0.2-compatibility.md).
+Version 0.1.5 requires DSH 0.2.1-rc.3 or a compatible host. See [compatibility details](docs/dsh-0.2-compatibility.md).
 
 清理子代理消息中的孤立工具块。
+
+在 `agent/created` 完成进入会话后，通过公开 `sessionQuery.readSurface` 一次读取当前模型可见事件，并持久替换不安全的子代理投递。异步读取期间已替换的节点不会恢复；读取失败会中止该次创建。步骤前清洗继续保留，不写入会话创建通知阶段，也不使用已移除的 `session.events`。
 
 ## 安装
 
@@ -24,6 +26,8 @@ pnpm dsh plugin --profile web add github:vb2250158/dsh-subagent-output-sanitizer
 npm test
 npm pack --dry-run
 ```
+
+Run the source-based rc.3 lifecycle check with `DSH_SOURCE_ROOT=<checkout> node --test tests/session-lifecycle.rc3.integration.mjs`. It covers the real SessionStore announcement, exact surface query, durable replacement and repeated creation notification.
 
 ## 许可证
 
