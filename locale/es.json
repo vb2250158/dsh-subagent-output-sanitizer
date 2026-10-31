@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Limpieza de salida de subagentes",
+    "description": "Elimina bloques de herramientas huérfanos de los mensajes de subagentes."
+  }
+}

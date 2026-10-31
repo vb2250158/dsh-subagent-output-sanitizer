@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Nettoyage des sorties des sous-agents",
+    "description": "Supprimez les blocs d’outils orphelins des messages des sous-agents."
+  }
+}

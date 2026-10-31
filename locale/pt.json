@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Limpeza de saídas de subagentes",
+    "description": "Remova blocos de ferramentas órfãos das mensagens dos subagentes."
+  }
+}
